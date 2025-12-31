@@ -25,7 +25,7 @@ db.run(`CREATE TABLE IF NOT EXISTS reports (
 const upload = multer({ dest: 'uploads/' });
 
 // Test route
-app.get('/', (req, res) => res.send('API is working'));
+app.get('/', (req, res) => res.send('API is working ✅'));
 
 // GET all reports
 app.get('/api/reports', (req, res) => {
