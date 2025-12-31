@@ -1,4 +1,71 @@
+const express = require('express');
+const cors = require('cors');
 const multer = require('multer');
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.use('/uploads', express.static('uploads'));
+
+// SQLite database
+const db = new sqlite3.Database('reports.db');
+db.run(`CREATE TABLE IF NOT EXISTS reports (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  description TEXT,
+  phone TEXT,
+  imageUrl TEXT,
+  latitude REAL,
+  longitude REAL,
+  status TEXT DEFAULT 'PENDING',
+  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+)`);
+
+const upload = multer({ dest: 'uploads/' });
+
+// Test route
+app.get('/', (req, res) => res.send('API is working'));
+
+// GET all reports
+app.get('/api/reports', (req, res) => {
+  db.all('SELECT * FROM reports ORDER BY createdAt DESC', (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+// POST new report
+app.post('/api/reports', upload.single('image'), (req, res) => {
+  const { description, phone, latitude, longitude } = req.body;
+  const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+  
+  db.run(`INSERT INTO reports (description, phone, imageUrl, latitude, longitude) 
+          VALUES (?, ?, ?, ?, ?)`,
+    [description, phone, imageUrl, latitude, longitude],
+    function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ id: this.lastID });
+    }
+  );
+});
+
+// PATCH update status
+app.patch('/api/reports/:id/status', (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  
+  db.run('UPDATE reports SET status = ? WHERE id = ?', [status, id], function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    if (this.changes === 0) return res.status(404).json({ error: 'Report not found' });
+    res.json({ success: true });
+  });
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+/*const multer = require('multer');
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
@@ -119,4 +186,4 @@ const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
+*/
