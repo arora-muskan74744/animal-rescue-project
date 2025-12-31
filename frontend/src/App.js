@@ -69,7 +69,7 @@ function App() {
 
       if (photo) formData.append('photo', photo);
 
-      const res = await fetch('http://localhost:5000/api/reports', {
+      const res = await fetch('http://voice-for-the-voiceless.onrender.com/api/reports', {
         method: 'POST',
         body: formData
       });
@@ -204,7 +204,7 @@ function ReportsList() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/reports?onlyOpen=true')
+    fetch('http://voice-for-the-voiceless.onrender.com/api/reports?onlyOpen=true')
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
@@ -227,7 +227,7 @@ function ReportsList() {
 
   const updateStatus = async (id, newStatus) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/reports/${id}/status`, {
+      const res = await fetch(`http://voice-for-the-voiceless.onrender.com/api/reports/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
@@ -272,7 +272,7 @@ function ReportsList() {
             <td>{r.reporter_phone}</td>
             <td>
               {r.image_path ? (
-                <a href={`http://localhost:5000${r.image_path}`} target="_blank" rel="noreferrer">
+                <a href={`http://voice-for-the-voiceless.onrender.com{r.image_path}`} target="_blank" rel="noreferrer">
                   View photo
                 </a>
               ) : (
